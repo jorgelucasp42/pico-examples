@@ -17,7 +17,7 @@
 void on_pwm_wrap() {
     static int fade = 0;
     static bool going_up = true;
-    // Clear the interrupt flag that brought us here
+    // Limpa a flag de interrupção que nos trouxe até aqui
     pwm_clear_irq(pwm_gpio_to_slice_num(PICO_DEFAULT_LED_PIN));
 
     if (going_up) {
@@ -33,8 +33,8 @@ void on_pwm_wrap() {
             going_up = true;
         }
     }
-    // Square the fade value to make the LED's brightness appear more linear
-    // Note this range matches with the wrap value
+    // Eleva ao quadrado o valor de fade para que o brilho do LED pareça mais linear
+    // Observe que esse intervalo corresponde ao valor de wrap
     pwm_set_gpio_level(PICO_DEFAULT_LED_PIN, fade * fade);
 }
 #endif
@@ -43,28 +43,28 @@ int main() {
 #ifndef PICO_DEFAULT_LED_PIN
 #warning pwm/led_fade example requires a board with a regular LED
 #else
-    // Tell the LED pin that the PWM is in charge of its value.
+    // Informa ao pino do LED que o PWM é o responsável pelo seu valor.
     gpio_set_function(PICO_DEFAULT_LED_PIN, GPIO_FUNC_PWM);
-    // Figure out which slice we just connected to the LED pin
+    // Descobre qual slice acabamos de conectar ao pino do LED
     uint slice_num = pwm_gpio_to_slice_num(PICO_DEFAULT_LED_PIN);
 
-    // Mask our slice's IRQ output into the PWM block's single interrupt line,
-    // and register our interrupt handler
+    // Faz o mascaramento da saída de IRQ do nosso slice na única linha de interrupção do bloco PWM
+    // e registra nosso tratador de interrupção
     pwm_clear_irq(slice_num);
     pwm_set_irq_enabled(slice_num, true);
     irq_set_exclusive_handler(PWM_DEFAULT_IRQ_NUM(), on_pwm_wrap);
     irq_set_enabled(PWM_DEFAULT_IRQ_NUM(), true);
 
-    // Get some sensible defaults for the slice configuration. By default, the
-    // counter is allowed to wrap over its maximum range (0 to 2**16-1)
+    // Obtém alguns valores padrão razoáveis para a configuração do slice. Por padrão, o
+    // contador pode fazer wrap em todo o seu intervalo máximo (0 a 2**16-1)
     pwm_config config = pwm_get_default_config();
-    // Set divider, reduces counter clock to sysclock/this value
+    // Define o divisor: reduz o clock do contador para sysclock/este valor
     pwm_config_set_clkdiv(&config, 4.f);
-    // Load the configuration into our PWM slice, and set it running.
+    // Carrega a configuração no nosso slice de PWM e inicia sua execução.
     pwm_init(slice_num, &config, true);
 
-    // Everything after this point happens in the PWM interrupt handler, so we
-    // can twiddle our thumbs
+    // A partir deste ponto, tudo acontece no tratador de interrupção do PWM, então
+    // podemos apenas aguardar
     while (1)
         tight_loop_contents();
 #endif

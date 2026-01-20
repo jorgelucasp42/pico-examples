@@ -10,18 +10,18 @@
 #include "hardware/pwm.h"
 #include "hardware/clocks.h"
 
-// This example drives a PWM output at a range of duty cycles, and uses
-// another PWM slice in input mode to measure the duty cycle. You'll need to
-// connect these two pins with a jumper wire:
+// Este exemplo gera uma saída PWM com diferentes duty cycles e usa
+// outro slice de PWM em modo de entrada para medir o duty cycle. Você precisará
+// conectar esses dois pinos com um jumper:
 const uint OUTPUT_PIN = 2;
 const uint MEASURE_PIN = 5;
 
 float measure_duty_cycle(uint gpio) {
-    // Only the PWM B pins can be used as inputs.
+    // Apenas os pinos PWM do canal B podem ser usados como entradas.
     assert(pwm_gpio_to_channel(gpio) == PWM_CHAN_B);
     uint slice_num = pwm_gpio_to_slice_num(gpio);
 
-    // Count once for every 100 cycles the PWM B input is high
+    // Conta uma vez a cada 100 ciclos em que a entrada PWM B estiver em nível alto
     pwm_config cfg = pwm_get_default_config();
     pwm_config_set_clkdiv_mode(&cfg, PWM_DIV_B_HIGH);
     pwm_config_set_clkdiv(&cfg, 100);
@@ -48,20 +48,20 @@ int main() {
     stdio_init_all();
     printf("\nPWM duty cycle measurement example\n");
 
-    // Configure PWM slice and set it running
+    // Configura o slice de PWM e o coloca em execução
     const uint count_top = 1000;
     pwm_config cfg = pwm_get_default_config();
     pwm_config_set_wrap(&cfg, count_top);
     pwm_init(pwm_gpio_to_slice_num(OUTPUT_PIN), &cfg, true);
 
-    // Note we aren't touching the other pin yet -- PWM pins are outputs by
-    // default, but change to inputs once the divider mode is changed from
-    // free-running. It's not wise to connect two outputs directly together!
+    // Observe que ainda não estamos mexendo no outro pino — pinos PWM são saídas por
+    // padrão, mas passam a ser entradas quando o modo do divisor é alterado de
+    // “free-running”. Não é recomendável conectar duas saídas diretamente!
     gpio_set_function(OUTPUT_PIN, GPIO_FUNC_PWM);
 
-    // For each of our test duty cycles, drive the output pin at that level,
-    // and read back the actual output duty cycle using the other pin. The two
-    // values should be very close!
+    // Para cada duty cycle de teste, gera a saída nesse nível
+    // e lê o duty cycle real usando o outro pino. Os dois valores
+    // devem ser bem próximos!
     for (uint i = 0; i < count_of(test_duty_cycles); ++i) {
         float output_duty_cycle = test_duty_cycles[i];
         pwm_set_gpio_level(OUTPUT_PIN, (uint16_t) (output_duty_cycle * (count_top + 1)));

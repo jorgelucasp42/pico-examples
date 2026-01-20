@@ -6,8 +6,8 @@
 
 #include "pico/stdlib.h"
 
-// Pico W devices use a GPIO on the WIFI chip for the LED,
-// so when building for Pico W, CYW43_WL_GPIO_LED_PIN will be defined
+// Dispositivos Pico W usam um GPIO no chip de Wi-Fi para o LED;
+// então, ao compilar para Pico W, CYW43_WL_GPIO_LED_PIN será definido
 #ifdef CYW43_WL_GPIO_LED_PIN
 #include "pico/cyw43_arch.h"
 #endif
@@ -16,27 +16,27 @@
 #define LED_DELAY_MS 250
 #endif
 
-// Perform initialisation
+// Realiza a inicialização
 int pico_led_init(void) {
 #if defined(PICO_DEFAULT_LED_PIN)
-    // A device like Pico that uses a GPIO for the LED will define PICO_DEFAULT_LED_PIN
-    // so we can use normal GPIO functionality to turn the led on and off
+    // Um dispositivo como o Pico, que usa um GPIO para o LED, definirá PICO_DEFAULT_LED_PIN,
+    // então podemos usar as funções normais de GPIO para ligar e desligar o LED
     gpio_init(PICO_DEFAULT_LED_PIN);
     gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
     return PICO_OK;
 #elif defined(CYW43_WL_GPIO_LED_PIN)
-    // For Pico W devices we need to initialise the driver etc
+    // Para dispositivos Pico W, precisamos inicializar o driver etc.
     return cyw43_arch_init();
 #endif
 }
 
-// Turn the led on or off
+// Liga ou desliga o LED
 void pico_set_led(bool led_on) {
 #if defined(PICO_DEFAULT_LED_PIN)
-    // Just set the GPIO on or off
+    // Apenas define o GPIO como ligado ou desligado
     gpio_put(PICO_DEFAULT_LED_PIN, led_on);
 #elif defined(CYW43_WL_GPIO_LED_PIN)
-    // Ask the wifi "driver" to set the GPIO on or off
+    // Solicita ao “driver” do Wi-Fi que defina o GPIO como ligado ou desligado
     cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, led_on);
 #endif
 }
