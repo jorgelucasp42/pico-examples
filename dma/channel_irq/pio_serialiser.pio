@@ -6,7 +6,8 @@
 
 .program pio_serialiser
 
-; Just serialise a stream of bits. Take 32 bits from each FIFO record. LSB-first.
+; Apenas serializa um fluxo de bits.
+; Retira 32 bits de cada registro do FIFO. LSB primeiro (bit menos significativo primeiro).
 
 .wrap_target
     out pins, 1

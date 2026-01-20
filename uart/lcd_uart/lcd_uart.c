@@ -4,19 +4,20 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-/* Example code to drive a 16x2 LCD panel via an Adafruit TTL LCD "backpack"
+/* Código de exemplo para controlar um painel LCD 16x2
+   usando um “backpack” LCD TTL da Adafruit.
 
-   Optionally, the backpack can be connected the VBUS (pin 40) at 5V if
-   the Pico in question is powered by USB for greater brightness.
-   
-   If this is done, then no other connections should be made to the backpack apart
-   from those listed below as the backpack's logic levels will change.
+   Opcionalmente, o backpack pode ser conectado ao VBUS (pino 40) em 5V
+   se o Pico em questão for alimentado por USB, para obter maior brilho.
 
-   Connections on Raspberry Pi Pico board, other boards may vary.
+   Se isso for feito, nenhuma outra conexão deve ser feita ao backpack
+   além das listadas abaixo, pois os níveis lógicos do backpack irão mudar.
 
-   GPIO 8 (pin 11)-> RX on backpack
-   3.3v (pin 36) -> 3.3v on backpack
-   GND (pin 38)  -> GND on backpack
+   Conexões na placa Raspberry Pi Pico (outras placas podem variar):
+
+   GPIO 8 (pino 11) -> RX no backpack
+   3.3V (pino 36)   -> 3.3V no backpack
+   GND (pino 38)    -> GND no backpack
 */
 
 #include <stdio.h>
@@ -25,14 +26,14 @@
 #include "pico/binary_info.h"
 #include "hardware/uart.h"
 
- // leave uart0 free for stdio
+// deixa a uart0 livre para stdio
 #define UART_ID uart1
 #define BAUD_RATE 9600
 #define UART_TX_PIN 8
 #define LCD_WIDTH 16
 #define LCD_HEIGHT 2
 
-// basic commands
+// comandos básicos
 #define LCD_DISPLAY_ON 0x42
 #define LCD_DISPLAY_OFF 0x46
 #define LCD_SET_BRIGHTNESS 0x99
@@ -42,7 +43,7 @@
 #define LCD_CLEAR_SCREEN 0x58
 #define LCD_SET_SPLASH 0x40
 
-// cursor commands
+// comandos de cursor
 #define LCD_SET_CURSOR_POS 0x47
 #define LCD_CURSOR_HOME 0x48
 #define LCD_CURSOR_BACK 0x4C
@@ -52,77 +53,93 @@
 #define LCD_BLOCK_CURSOR_ON 0x53
 #define LCD_BLOCK_CURSOR_OFF 0x54
 
-// rgb commands
+// comandos RGB
 #define LCD_SET_BACKLIGHT_COLOR 0xD0
 #define LCD_SET_DISPLAY_SIZE 0xD1
 
-// change to 0 if display is not RGB capable
+// altere para 0 se o display não suportar RGB
 #define LCD_IS_RGB 1
 
-void lcd_write(uint8_t cmd, uint8_t* buf, uint8_t buflen) {
-    // all commands are prefixed with 0xFE
+void lcd_write(uint8_t cmd, uint8_t *buf, uint8_t buflen)
+{
+    // todos os comandos são prefixados com 0xFE
     const uint8_t pre = 0xFE;
     uart_write_blocking(UART_ID, &pre, 1);
     uart_write_blocking(UART_ID, &cmd, 1);
     uart_write_blocking(UART_ID, buf, buflen);
-    sleep_ms(10); // give the display some time
+    sleep_ms(10); // dá um pequeno tempo para o display processar
 }
 
-void lcd_set_size(uint8_t w, uint8_t h) {
-    // sets the dimensions of the display
-    uint8_t buf[] = { w, h };
+void lcd_set_size(uint8_t w, uint8_t h)
+{
+    // define as dimensões do display
+    uint8_t buf[] = {w, h};
     lcd_write(LCD_SET_DISPLAY_SIZE, buf, 2);
 }
 
-void lcd_set_contrast(uint8_t contrast) {
-    // sets the display contrast
+void lcd_set_contrast(uint8_t contrast)
+{
+    // define o contraste do display
     lcd_write(LCD_SET_CONTRAST, &contrast, 1);
 }
 
-void lcd_set_brightness(uint8_t brightness) {
-    // sets the backlight brightness
+void lcd_set_brightness(uint8_t brightness)
+{
+    // define o brilho do backlight
     lcd_write(LCD_SET_BRIGHTNESS, &brightness, 1);
 }
 
-void lcd_set_cursor(bool is_on) {
-    // set is_on to true if we want the blinking block and underline cursor to show
-    if (is_on) {
+void lcd_set_cursor(bool is_on)
+{
+    // defina is_on como true se quiser mostrar o cursor em bloco piscante e sublinhado
+    if (is_on)
+    {
         lcd_write(LCD_BLOCK_CURSOR_ON, NULL, 0);
         lcd_write(LCD_UNDERLINE_CURSOR_ON, NULL, 0);
-    } else {
+    }
+    else
+    {
         lcd_write(LCD_BLOCK_CURSOR_OFF, NULL, 0);
         lcd_write(LCD_UNDERLINE_CURSOR_OFF, NULL, 0);
     }
 }
 
-void lcd_set_backlight(bool is_on) {
-    // turn the backlight on (true) or off (false)
-    if (is_on) {
-        lcd_write(LCD_DISPLAY_ON, (uint8_t *) 0, 1);
-    } else {
+void lcd_set_backlight(bool is_on)
+{
+    // liga (true) ou desliga (false) o backlight
+    if (is_on)
+    {
+        lcd_write(LCD_DISPLAY_ON, (uint8_t *)0, 1);
+    }
+    else
+    {
         lcd_write(LCD_DISPLAY_OFF, NULL, 0);
     }
 }
 
-void lcd_clear() {
-    // clear the contents of the display
+void lcd_clear()
+{
+    // limpa o conteúdo do display
     lcd_write(LCD_CLEAR_SCREEN, NULL, 0);
 }
 
-void lcd_cursor_reset() {
-    // reset the cursor to (1, 1)
+void lcd_cursor_reset()
+{
+    // reseta o cursor para a posição (1, 1)
     lcd_write(LCD_CURSOR_HOME, NULL, 0);
 }
 
 #if LCD_IS_RGB
-void lcd_set_backlight_color(uint8_t r, uint8_t g, uint8_t b) {
-    // only supported on RGB displays!
-    uint8_t buf[] = { r, g, b };
+void lcd_set_backlight_color(uint8_t r, uint8_t g, uint8_t b)
+{
+    // suportado apenas em displays RGB!
+    uint8_t buf[] = {r, g, b};
     lcd_write(LCD_SET_BACKLIGHT_COLOR, buf, 3);
 }
 #endif
 
-void lcd_init() {
+void lcd_init()
+{
     lcd_set_backlight(true);
     lcd_set_size(LCD_WIDTH, LCD_HEIGHT);
     lcd_set_contrast(155);
@@ -130,7 +147,8 @@ void lcd_init() {
     lcd_set_cursor(false);
 }
 
-int main() {
+int main()
+{
     stdio_init_all();
     uart_init(UART_ID, BAUD_RATE);
     uart_set_translate_crlf(UART_ID, false);
@@ -140,8 +158,8 @@ int main() {
 
     lcd_init();
 
-    // define startup sequence and save to EEPROM
-    // no more or less than 32 chars, if not enough, fill remaining ones with spaces
+    // define a sequência de inicialização e salva na EEPROM
+    // nem mais nem menos que 32 caracteres; se faltar, preencha o restante com espaços
     uint8_t splash_buf[] = "Hello LCD, from Pi Towers!      ";
     lcd_write(LCD_SET_SPLASH, splash_buf, LCD_WIDTH * LCD_HEIGHT);
 
@@ -149,20 +167,22 @@ int main() {
     lcd_clear();
 
 #if LCD_IS_RGB
-    uint8_t i = 0; // it's ok if this overflows and wraps, we're using sin
+    uint8_t i = 0; // não tem problema se isso estourar e voltar, estamos usando seno
     const float frequency = 0.1f;
     uint8_t red, green, blue;
 #endif
 
-    while (1) {
-        // send any chars from stdio straight to the backpack
+    while (1)
+    {
+        // envia quaisquer caracteres vindos do stdio diretamente para o backpack
         char c = getchar();
-        // any bytes not followed by 0xFE (the special command) are interpreted
-        // as text to be displayed on the backpack, so we just send the char
-        // down the UART byte pipe!
-        if (c < 128) uart_putc_raw(UART_ID, c); // skip extra non-ASCII chars
+        // quaisquer bytes não precedidos por 0xFE (comando especial)
+        // são interpretados como texto a ser exibido no backpack,
+        // então apenas enviamos o caractere pela UART!
+        if (c < 128)
+            uart_putc_raw(UART_ID, c); // ignora caracteres extras não-ASCII
 #if LCD_IS_RGB
-        // change the display color on keypress, rainbow style!
+        // muda a cor do display a cada tecla pressionada, estilo arco-íris!
         red = (uint8_t)(sin(frequency * i + 0) * 127 + 128);
         green = (uint8_t)(sin(frequency * i + 2) * 127 + 128);
         blue = (uint8_t)(sin(frequency * i + 4) * 127 + 128);

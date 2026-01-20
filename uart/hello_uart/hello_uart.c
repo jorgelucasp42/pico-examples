@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: BSD-3-Clause
  */
 
-
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "hardware/uart.h"
@@ -14,30 +13,30 @@
 #define UART_ID uart0
 #define BAUD_RATE 115200
 
-// We are using pins 0 and 1, but see the GPIO function select table in the
-// datasheet for information on which other pins can be used.
+// Estamos usando os pinos 0 e 1, mas veja a tabela de seleção de função dos GPIOs
+// no datasheet para informações sobre quais outros pinos podem ser usados.
 #define UART_TX_PIN 0
 #define UART_RX_PIN 1
 
 int main() {
-    // Set up our UART with the required speed.
+    // Configura a UART com a velocidade necessária.
     uart_init(UART_ID, BAUD_RATE);
 
-    // Set the TX and RX pins by using the function select on the GPIO
-    // Set datasheet for more information on function select
+    // Define os pinos TX e RX usando a seleção de função do GPIO
+    // Consulte o datasheet para mais informações sobre a seleção de função
     gpio_set_function(UART_TX_PIN, UART_FUNCSEL_NUM(UART_ID, UART_TX_PIN));
     gpio_set_function(UART_RX_PIN, UART_FUNCSEL_NUM(UART_ID, UART_RX_PIN));
 
-    // Use some the various UART functions to send out data
-    // In a default system, printf will also output via the default UART
+    // Usa algumas das várias funções da UART para enviar dados
+    // Em um sistema padrão, o printf também irá enviar dados pela UART padrão
 
-    // Send out a character without any conversions
+    // Envia um caractere sem nenhuma conversão
     uart_putc_raw(UART_ID, 'A');
 
-    // Send out a character but do CR/LF conversions
+    // Envia um caractere realizando conversões CR/LF
     uart_putc(UART_ID, 'B');
 
-    // Send out a string, with CR/LF conversions
+    // Envia uma string, com conversões CR/LF
     uart_puts(UART_ID, " Hello, UART!\n");
     return 0;
 }
